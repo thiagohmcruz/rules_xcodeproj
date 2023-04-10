@@ -28,6 +28,7 @@ struct Target: Equatable {
     var outputs: Outputs
     let isUnfocusedDependency: Bool
     var additionalSchemeTargets: Set<TargetID>
+    var originalTargetID: TargetID?
 }
 
 struct CompileTarget: Equatable {
@@ -72,6 +73,7 @@ extension Target: Decodable {
         case outputs = "o"
         case isUnfocusedDependency = "u"
         case additionalSchemeTargets = "7"
+        case originalTargetID = "oi"
     }
 
     init(from decoder: Decoder) throws {
@@ -127,6 +129,8 @@ extension Target: Decodable {
             .decodeIfPresent(Bool.self, forKey: .isUnfocusedDependency) ?? false
         additionalSchemeTargets = try container
             .decodeTargetIDs(.additionalSchemeTargets)
+        originalTargetID = try container
+            .decodeIfPresent(TargetID.self, forKey: .originalTargetID)
     }
 }
 

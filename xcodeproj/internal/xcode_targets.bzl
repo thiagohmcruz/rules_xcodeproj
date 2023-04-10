@@ -22,6 +22,7 @@ load(":platforms.bzl", "platforms")
 def _make_xcode_target(
         *,
         id,
+        original_id = None,
         label,
         configuration,
         compile_target_swift = None,
@@ -55,6 +56,7 @@ def _make_xcode_target(
         id: A unique identifier. No two Xcode targets will have the same `id`.
             This won't be user facing, the generator will use other fields to
             generate a unique name for a target.
+        original_id: foo
         label: The `Label` of the `Target`.
         configuration: The configuration of the `Target`.
         compile_target_swift: The Swift `xcode_target` that was merged into
@@ -130,6 +132,7 @@ def _make_xcode_target(
         _app_clips = tuple(app_clips),
         _dependencies = dependencies,
         id = id,
+        original_id = original_id,
         label = label,
         configuration = configuration,
         c_params = c_params,
@@ -343,6 +346,7 @@ def _merge_xcode_target(*, src_swift, src_non_swift, dest):
 
     return _make_xcode_target(
         id = dest.id,
+        original_id = dest.original_id,
         label = dest.label,
         configuration = dest.configuration,
         compile_target_swift = src_swift,
@@ -610,6 +614,7 @@ def _xcode_target_to_dto(
         "1": xcode_target._package_bin_dir,
         "2": platforms.to_dto(xcode_target.platform),
         "p": _product_to_dto(xcode_target.product),
+        "oi": xcode_target.original_id,
     }
 
     if xcode_configurations != ["Debug"]:
@@ -618,6 +623,7 @@ def _xcode_target_to_dto(
     if xcode_target._compile_targets:
         dto["3"] = [{
             "i": compile_target.id,
+            "oi": compile_target.original_id,
             "n": compile_target.label.name,
         } for compile_target in xcode_target._compile_targets]
 
@@ -758,7 +764,7 @@ def _xcode_target_to_dto(
         if (id not in excluded_targets and
             # TODO: Move dependency filtering here (out of the generator)
             # In BwX mode there can only be one merge destination
-            target_merges.get(id, [id])[0] != xcode_target.id)
+            len([x for x in target_merges.get(id, [id]) if x != xcode_target.id]) == 0)
     ]
 
     set_if_true(

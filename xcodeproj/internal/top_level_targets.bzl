@@ -522,6 +522,7 @@ def process_top_level_target(
         transitive_dependencies = transitive_dependencies,
         xcode_target = xcode_targets.make(
             id = id,
+            original_id = id,
             label = label,
             configuration = configuration,
             package_bin_dir = package_bin_dir,

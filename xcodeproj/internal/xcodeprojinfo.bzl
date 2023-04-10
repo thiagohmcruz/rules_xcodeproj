@@ -71,6 +71,7 @@ _BUILD_TEST_RULES = {
     "macos_build_test": None,
     "tvos_build_test": None,
     "watchos_build_test": None,
+    "test_suite": None,
 }
 
 def _should_skip_target(*, ctx, target):
@@ -259,6 +260,17 @@ def _skip_target(
         if attr in deps_attrs and info.xcode_target
     ]
 
+    foo = memory_efficient_depset(
+        [
+            struct(id = info.xcode_target.id, label = target.label)
+            for info in deps_transitive_infos
+        ],
+        transitive = [
+            info.replacement_labels
+            for info in valid_transitive_infos
+        ],
+    )
+
     return _target_info_fields(
         args = memory_efficient_depset(
             [
@@ -311,16 +323,7 @@ def _skip_target(
                 for info in valid_transitive_infos
             ],
         ),
-        replacement_labels = memory_efficient_depset(
-            [
-                struct(id = info.xcode_target.id, label = target.label)
-                for info in deps_transitive_infos
-            ],
-            transitive = [
-                info.replacement_labels
-                for info in valid_transitive_infos
-            ],
-        ),
+        replacement_labels = foo,
         resource_bundle_informations = memory_efficient_depset(
             transitive = [
                 info.resource_bundle_informations
@@ -548,7 +551,8 @@ def create_xcodeprojinfo(*, ctx, build_mode, target, attrs, transitive_infos):
         target = target,
     )
 
-    if _should_skip_target(ctx = ctx, target = target):
+    skip = _should_skip_target(ctx = ctx, target = target)
+    if skip:
         info_fields = _skip_target(
             ctx = ctx,
             target = target,

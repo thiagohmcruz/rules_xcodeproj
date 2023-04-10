@@ -310,6 +310,7 @@ $(BAZEL_OUT)\#(linkParams.path.string.dropFirst(9))
         } else {
             compileTargetName = target.name
         }
+
         buildSettings.set("COMPILE_TARGET_NAME", to: compileTargetName)
 
         buildSettings.set(

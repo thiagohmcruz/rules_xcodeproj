@@ -2,6 +2,7 @@
 
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@bazel_skylib//lib:types.bzl", "types")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load(
     "//xcodeproj/internal/bazel_integration_files:actions.bzl",
@@ -297,7 +298,8 @@ def _process_targets(
         name,
         owned_extra_files,
         include_swiftui_previews_scheme_targets,
-        fail_for_invalid_extra_files_targets):
+        fail_for_invalid_extra_files_targets,
+        multiple_labels):
     resource_bundle_xcode_targets = []
     unprocessed_targets = {}
     xcode_configurations = {}
@@ -1485,12 +1487,47 @@ configurations: {}""".format(", ".join(xcode_configurations)))
     )
     focused_labels = {label: None for label in ctx.attr.focused_targets}
     unfocused_labels = {label: None for label in ctx.attr.unfocused_targets}
+
+    replacement_labels_infos = depset(
+        transitive = [info.replacement_labels for info in infos],
+    ).to_list()
+
+    multiple_labels = {}
+    for r in replacement_labels_infos:
+        if r.id not in multiple_labels:
+            multiple_labels[r.id] = []
+        multiple_labels[r.id].append(r.label)
+
+    multiple_labels = {
+        id: labels
+        for id, labels in multiple_labels.items() if len(labels) > 1
+    }
     replacement_labels = {
         r.id: r.label
-        for r in depset(
-            transitive = [info.replacement_labels for info in infos],
-        ).to_list()
+        for r in replacement_labels_infos if r.id not in multiple_labels
     }
+
+    def _longest_common_prefix(strs):
+        if not strs:
+            return ""
+        shortest_str = strs[0]
+        for s in strs:
+            if len(s) < len(shortest_str):
+                shortest_str = s
+        index = 0
+        for char in shortest_str.elems():
+            for other in strs:
+                if other[index] != char:
+                    return shortest_str[:index]
+            index += 1
+        return shortest_str
+
+    for (id, labels) in multiple_labels.items():
+        foo = _longest_common_prefix(["%s" % label for label in labels])
+        if "_" in foo:
+            foo = foo.split("_")[0]
+        fooa = "@%s" % foo
+        replacement_labels[id] = Label(fooa)
 
     (
         targets,
@@ -1524,6 +1561,7 @@ configurations: {}""".format(", ".join(xcode_configurations)))
         owned_extra_files = ctx.attr.owned_extra_files,
         replacement_labels = replacement_labels,
         unfocused_labels = unfocused_labels,
+        multiple_labels = multiple_labels,
     )
 
     args = {
@@ -1563,6 +1601,7 @@ configurations: {}""".format(", ".join(xcode_configurations)))
         actions = actions,
         name = name,
         target_dtos = target_dtos,
+        multiple_labels = multiple_labels,
     )
 
     extension_infoplists = [
