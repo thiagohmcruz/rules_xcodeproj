@@ -93,6 +93,8 @@ def _should_skip_target(*, ctx, target):
     """
     if ctx.rule.kind in _BUILD_TEST_RULES:
         return True
+    if ctx.rule.kind in _TEST_SUITE_RULES:
+        return True
 
     if ctx.rule.kind in _TEST_SUITE_RULES:
         return True
