@@ -614,14 +614,17 @@ def _collect_input_files(
         indexstores_output_group_name = "xi {}".format(id)
         linking_output_group_name = "xl {}".format(id)
 
+        # foo = ""
         # if ctx.rule.attr.name.count("Runnable"):
-        #     print(ctx.rule.attr.name)
+        #     # print(ctx.rule.attr.name)
+        #     foo = "lol"
 
         indexstores_filelist = filelists.write(
             ctx = ctx,
             rule_name = ctx.rule.attr.name,
             name = "xi",
             files = indexstores_depset,
+            source = "input",
         )
 
         # We don't want to declare indexstore files as outputs, because they

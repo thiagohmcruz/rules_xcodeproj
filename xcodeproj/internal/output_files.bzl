@@ -120,15 +120,15 @@ def _create(
         products_output_group_name = "bp {}".format(direct_outputs.id)
 
         # if ctx.rule.attr.name.count("Runnable"):
-        #     print(ctx.rule.attr.name)
-        #     print(ctx.rule.kind)
+            #     print(ctx.rule.attr.name)
+            #     print(ctx.rule.kind)
             # print(dir(ctx.rule.attr))
-            # print(direct_outputs.id)
         indexstores_filelist = filelists.write(
             ctx = ctx,
             rule_name = ctx.rule.attr.name,
             name = "bi",
             files = transitive_indexestores,
+            source = "output",
         )
 
         # We don't want to declare indexstore files as outputs, because they

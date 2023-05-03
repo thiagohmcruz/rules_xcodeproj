@@ -2,7 +2,7 @@
 
 load(":memory_efficiency.bzl", "EMPTY_DEPSET")
 
-def _write(*, ctx, rule_name, name, files):
+def _write(*, ctx, rule_name, name, files, source):
     if files == None:
         files = EMPTY_DEPSET
 
@@ -13,7 +13,10 @@ def _write(*, ctx, rule_name, name, files):
     args.set_param_file_format("multiline")
     args.add_all(files, expand_directories = False)
 
+    # print(source)
+    # output = ctx.actions.declare_file("{}-{}-{}.filelist".format(rule_name, source, name))
     output = ctx.actions.declare_file("{}-{}.filelist".format(rule_name, name))
+    # print(output.path)
     ctx.actions.write(output, args)
 
     return output

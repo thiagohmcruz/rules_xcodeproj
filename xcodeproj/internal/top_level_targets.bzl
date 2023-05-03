@@ -267,6 +267,7 @@ def process_top_level_target(
     )
 
     if infoplist:
+        print("infoplist: {}".format(infoplist))
         build_settings["INFOPLIST_FILE"] = build_setting_path(
             file = infoplist,
         )
