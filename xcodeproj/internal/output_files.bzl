@@ -112,11 +112,16 @@ def _create(
         ],
     )
 
+    # if ctx:
+    #     print("before: {}".format(ctx.rule.attr.name))
     if should_produce_output_groups and direct_outputs:
         generated_output_group_name = "bc {}".format(direct_outputs.id)
         linking_output_group_name = "bl {}".format(direct_outputs.id)
         products_output_group_name = "bp {}".format(direct_outputs.id)
 
+        # if ctx.rule.attr.name.count("Runnable"):
+        #     print(ctx.rule.attr.name)
+        #     print(direct_outputs.id)
         indexstores_filelist = filelists.write(
             ctx = ctx,
             rule_name = ctx.rule.attr.name,
@@ -300,6 +305,8 @@ def _collect_output_files(
         swift_info = swift_info,
     )
 
+    # if id.count("Runnable"):
+    #     print("_collect_output_files: id={}".format(id))
     return _create(
         ctx = ctx,
         direct_outputs = outputs,
@@ -322,6 +329,7 @@ def _merge_output_files(*, transitive_infos):
         values include the outputs of the transitive dependencies, via
         `transitive_infos` (e.g. `generated` and `extra_files`).
     """
+    # print("_merge_output_files")
     return _create(
         ctx = None,
         transitive_infos = transitive_infos,

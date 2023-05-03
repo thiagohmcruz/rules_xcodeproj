@@ -26,8 +26,8 @@ load(":platform.bzl", "platform_info")
 load(":project_options.bzl", "project_options_to_dto")
 load(":providers.bzl", "XcodeProjInfo")
 load(":resource_target.bzl", "process_resource_bundles")
-load(":target_id.bzl", "write_target_ids_list")
-load(":xcode_targets.bzl", "xcode_targets")
+load(":target_id.bzl", "write_target_ids_list", "get_id")
+load(":xcode_targets.bzl", "xcode_targets", "replace_label")
 
 # Utility
 
@@ -297,7 +297,9 @@ def _process_targets(
         name,
         owned_extra_files,
         include_swiftui_previews_scheme_targets,
-        fail_for_invalid_extra_files_targets):
+        fail_for_invalid_extra_files_targets,
+        multiple_labels):
+    # print("_process_targets")
     resource_bundle_xcode_targets = []
     unprocessed_targets = {}
     xcode_configurations = {}
@@ -329,6 +331,30 @@ def _process_targets(
 
         for id in configuration_unprocessed_targets:
             xcode_configurations.setdefault(id, []).append(xcode_configuration)
+
+
+    keys_with_multiple = [k for k in xcode_configurations.keys() if k in multiple_labels]
+    for k in keys_with_multiple:
+        foo_config = k.split(" ")[1]
+        v = xcode_configurations.pop(k)
+        m_labels = multiple_labels[k]
+        for m_l in m_labels:
+            m_id = get_id(label = m_l, configuration = foo_config)
+            for y in v:
+                xcode_configurations.setdefault(m_id, []).append(y)
+    # print(xcode_configurations)
+    # print("before: {}".format(unprocessed_targets))
+    keys_with_multiple = [k for k in unprocessed_targets.keys() if k in multiple_labels]
+    for k in keys_with_multiple:
+        v = unprocessed_targets.pop(k)
+        m_labels = multiple_labels[k]
+        for m_l in m_labels:
+            replaced_v = replace_label(v, "@//{}:{}".format(m_l.package, m_l.name))
+            unprocessed_targets.update({
+                replaced_v.id: replaced_v
+            })
+    # print("after: {}".format(unprocessed_targets))
+    # print(unprocessed_targets.keys())
 
     configurations_map = {}
     if is_fixture:
@@ -508,7 +534,25 @@ targets.
         transitive = [info.potential_target_merges for info in infos],
     ).to_list()
 
+    foo_potential_target_merges = []
+    for f in potential_target_merges:
+        if f.dest in multiple_labels:
+            foo_config = f.dest.split(" ")[1]
+            for m_l in multiple_labels[f.dest]:
+                foo_potential_target_merges.append(
+                    struct(
+                        dest = get_id(label = "@//{}:{}".format(m_l.package, m_l.name), configuration = foo_config),
+                        src = struct(id = f.src.id, product_path = f.src.product_path)
+                    )
+                )
+        else:
+            foo_potential_target_merges.append(f)
+
+    potential_target_merges = foo_potential_target_merges
+
     raw_target_merge_dests = {}
+    # print(potential_target_merges)
+    # print(unprocessed_targets.keys())
     for merge in potential_target_merges:
         src_target = unprocessed_targets[merge.src.id]
         src_label = bazel_labels.normalize_label(src_target.label)
@@ -714,6 +758,7 @@ targets.
         else:
             additional_scheme_target_ids = None
 
+        # print(xcode_target_labels)
         label = xcode_target_labels[xcode_target.id]
         target_xcode_configurations = xcode_configurations[xcode_target.id]
 
@@ -1485,12 +1530,32 @@ configurations: {}""".format(", ".join(xcode_configurations)))
     )
     focused_labels = {label: None for label in ctx.attr.focused_targets}
     unfocused_labels = {label: None for label in ctx.attr.unfocused_targets}
+
+    replacement_labels_infos = depset(
+        transitive = [info.replacement_labels for info in infos],
+    ).to_list()
+    multiple_labels = {}
+    for r in replacement_labels_infos:
+        if r.id not in multiple_labels:
+            multiple_labels[r.id] = []
+        multiple_labels[r.id].append(r.label)
+
+    # if len(multiple_labels):
+    #     multiple_labels["@//tests/macos/xcodeproj:Single-Application-RunnableTestSuite.__internal__.__test_bundle applebin_ios-ios_sim_arm64-dbg-ST-d1716b12dfa6"].append("@//tests/macos/xcodeproj:Single-Application-RunnableTestSuite.__internal__.__test_bundle")
+
+    multiple_labels = {
+        id: labels
+        for id, labels in multiple_labels.items() if len(labels) > 1
+    }
+
+    # print(multiple_labels)
+
     replacement_labels = {
         r.id: r.label
-        for r in depset(
-            transitive = [info.replacement_labels for info in infos],
-        ).to_list()
+        for r in replacement_labels_infos if r.id not in multiple_labels
     }
+
+    # print(replacement_labels)
 
     (
         targets,
@@ -1524,6 +1589,7 @@ configurations: {}""".format(", ".join(xcode_configurations)))
         owned_extra_files = ctx.attr.owned_extra_files,
         replacement_labels = replacement_labels,
         unfocused_labels = unfocused_labels,
+        multiple_labels = multiple_labels,
     )
 
     args = {

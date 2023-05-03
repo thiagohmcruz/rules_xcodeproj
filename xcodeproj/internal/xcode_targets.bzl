@@ -18,6 +18,76 @@ load(
     "memory_efficient_depset",
 )
 load(":platform.bzl", "platform_info")
+load(":target_id.bzl", "get_id")
+
+def replace_label(xcode_target, label):
+    # ["_app_clips", "_build_settings", "_c_has_fortify_source", "_compile_targets", "_cxx_has_fortify_source", "_dependencies", "_extensions", "_modulemaps", "_package_bin_dir", "_swiftmodules", "_test_host", "_watch_application", "c_params", "configuration", "cxx_params", "id", "inputs", "label", "linker_inputs", "lldb_context", "lldb_context_key", "outputs", "platform", "product", "should_create_xcode_target", "swift_params", "to_json", "to_proto", "transitive_dependencies", "xcode_required_targets"
+    # fail(dir(xcode_target))
+    # print(xcode_target.configuration)
+    # struct(
+    #     _additional_files = depset([]), 
+    #     additional_product_files = (), 
+    #     basename = "Single-Application-RunnableTestSuite.xctest", 
+    #     executable = None, 
+    #     executable_name = "Single-Application-RunnableTestSuite", 
+    #     file = <generated file tests/macos/xcodeproj/Single-Application-RunnableTestSuite.xctest>, 
+    #     file_path = "bazel-out/applebin_ios-ios_sim_arm64-dbg-ST-d1716b12dfa6/bin/tests/macos/xcodeproj/Single-Application-RunnableTestSuite.xctest", 
+    #     framework_files = depset([]), 
+    #     is_resource_bundle = False, 
+    #     name = "Single-Application-RunnableTestSuite", 
+    #     package_dir = "bazel-out/applebin_ios-ios_sim_arm64-dbg-ST-d1716b12dfa6/bin/tests/macos/xcodeproj", 
+    #     type = "com.apple.product-type.bundle.unit-test"
+    # )
+    # foo_product = struct(
+    #     _additional_files = xcode_target.product._additional_files,
+    #     additional_product_files = xcode_target.product.additional_product_files,
+    #     basename = xcode_target.product.basename,
+    #     executable = xcode_target.product.executable,
+    #     executable_name = "Single-Application-RunnableTestSuite".replace("Single-Application-RunnableTestSuite", Label(label).name),
+    #     file = xcode_target.product.file,
+    #     file_path = xcode_target.product.file_path.replace("Single-Application-RunnableTestSuite", Label(label).name),
+    #     framework_files = xcode_target.product.framework_files,
+    #     is_resource_bundle = xcode_target.product.is_resource_bundle, 
+    #     name = xcode_target.product.name.replace("Single-Application-RunnableTestSuite", Label(label).name),
+    #     package_dir = xcode_target.product.package_dir,
+    #     type = xcode_target.product.type,
+    # )
+    foo =  struct(
+        id = get_id(label = label, configuration = xcode_target.configuration),
+        label = Label(label),
+        configuration = xcode_target.configuration,
+        _app_clips = xcode_target._app_clips,
+        _build_settings = xcode_target._build_settings,
+        _c_has_fortify_source = xcode_target._c_has_fortify_source,
+        _compile_targets = xcode_target._compile_targets,
+        _cxx_has_fortify_source = xcode_target._cxx_has_fortify_source,
+        _dependencies = xcode_target._dependencies,
+        _extensions = xcode_target._extensions,
+        _modulemaps = xcode_target._modulemaps,
+        _package_bin_dir = xcode_target._package_bin_dir,
+        _swiftmodules = xcode_target._swiftmodules,
+        _test_host = xcode_target._test_host,
+        _watch_application = xcode_target._watch_application,
+        c_params = xcode_target.c_params,
+        cxx_params = xcode_target.cxx_params,
+        inputs = xcode_target.inputs,
+        linker_inputs = xcode_target.linker_inputs,
+        lldb_context = xcode_target.lldb_context,
+        # lldb_context_key = xcode_target.lldb_context_key.replace("Single-Application-RunnableTestSuite", Label(label).name), # arm64-apple-ios-simulator Single-Application-RunnableTestSuite.xctest/Single-Application-RunnableTestSuite
+        lldb_context_key = xcode_target.lldb_context_key,
+        outputs = xcode_target.outputs,
+        platform = xcode_target.platform,
+        # product = foo_product, # bazel-out/applebin_ios-ios_sim_arm64-dbg-ST-d1716b12dfa6/bin/tests/macos/xcodeproj/Single-Application-RunnableTestSuite.xctest
+        product = xcode_target.product, # bazel-out/applebin_ios-ios_sim_arm64-dbg-ST-d1716b12dfa6/bin/tests/macos/xcodeproj/Single-Application-RunnableTestSuite.xctest
+        should_create_xcode_target = xcode_target.should_create_xcode_target,
+        swift_params = xcode_target.swift_params,
+        transitive_dependencies = xcode_target.transitive_dependencies,
+        xcode_required_targets = xcode_target.xcode_required_targets,
+    )
+
+    # print(foo)
+
+    return foo
 
 def _make_xcode_target(
         *,

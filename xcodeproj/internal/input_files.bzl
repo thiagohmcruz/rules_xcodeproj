@@ -614,6 +614,9 @@ def _collect_input_files(
         indexstores_output_group_name = "xi {}".format(id)
         linking_output_group_name = "xl {}".format(id)
 
+        # if ctx.rule.attr.name.count("Runnable"):
+        #     print(ctx.rule.attr.name)
+
         indexstores_filelist = filelists.write(
             ctx = ctx,
             rule_name = ctx.rule.attr.name,
