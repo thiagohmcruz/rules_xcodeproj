@@ -780,7 +780,7 @@ def _xcode_target_to_dto(
 
     replaced_dependencies = []
 
-    def _handle_dependency(id, xcode_target_id):
+    def _handle_dependency(id, foo = 0):
         # print(id)
         # print(xcode_target_id)
 
@@ -788,28 +788,28 @@ def _xcode_target_to_dto(
 
         # print(merged_dependency)
         if merged_dependency:
-            dependency = merged_dependency[0]
+            dependency = merged_dependency[foo]
             replaced_dependencies.append(dependency)
         else:
             dependency = id
         return dependency
 
     # if xcode_target.id.count("_iPhone"):
-        # print(target_merges)
+    # print(target_merges)
 
     dependencies = [
-        _handle_dependency(id, xcode_target.id)
+        _handle_dependency(id)
         for id in xcode_target._dependencies.to_list()
         if (id not in excluded_targets and
             # TODO: Move dependency filtering here (out of the generator)
             # In BwX mode there can only be one merge destination
             target_merges.get(id, [id])[0] != xcode_target.id)
-    ]
+    ] + [_handle_dependency("@//tests/macos/xcodeproj:Single-Application-RunnableTestSuite_swift ios-sim_arm64-min11.0-applebin_ios-ios_sim_arm64-dbg-ST-d1716b12dfa6", 1)]
 
-    # if xcode_target.id.count("_iPhone"):
-    #     print("xcode_target.id={}".format(xcode_target.id))
-    #     print("dependencies={}".format(dependencies))
-    #     print([id for id in dependencies if id not in bwx_unfocused_dependencies])
+    if xcode_target.id.count("_iPhone"):
+        print("xcode_target.id={}".format(xcode_target.id))
+        print("dependencies={}".format(dependencies))
+        print([id for id in dependencies if id not in bwx_unfocused_dependencies])
     set_if_true(
         dto,
         "d",

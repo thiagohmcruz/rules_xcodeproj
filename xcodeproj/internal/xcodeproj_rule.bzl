@@ -683,7 +683,6 @@ targets.
             # can't merge into other targets
             non_mergable_targets[library.path] = None
 
-    print("before: {}".format(target_merges))
     for src in target_merges.keys():
         src_target = focused_targets[src]
         if (len(non_terminal_dests.get(src, [])) > 1 or
@@ -692,7 +691,6 @@ targets.
             # target consolidation issues
             for id in target_merge_srcs_by_label[src_target.label]:
                 target_merges.pop(id, None)
-    print("after: {}".format(target_merges))
 
     # Remap 'target_merge_dests' after popping invalid merges.
     target_merge_dests = {}
