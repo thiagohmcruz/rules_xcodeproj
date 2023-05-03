@@ -39,6 +39,8 @@ def _process_resource_bundle(bundle, *, information):
         linker_inputs = None,
     )
 
+    # if id.count("Runnable"):
+    #     print("resource: id={}".format(id))
     (target_outputs, _) = output_files.collect(
         ctx = None,
         debug_outputs = None,

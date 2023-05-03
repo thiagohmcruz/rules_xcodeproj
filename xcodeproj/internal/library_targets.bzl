@@ -131,6 +131,8 @@ def process_library_target(
     )
     debug_outputs = target[apple_common.AppleDebugOutputs] if apple_common.AppleDebugOutputs in target else None
     output_group_info = target[OutputGroupInfo] if OutputGroupInfo in target else None
+    # if id.count("Runnable"):
+    #     print("library: id={}".format(id))
     (target_outputs, provider_outputs) = output_files.collect(
         ctx = ctx,
         debug_outputs = debug_outputs,

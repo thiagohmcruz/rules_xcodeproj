@@ -420,6 +420,8 @@ def _create_xcodeprojinfo(
             transitive_infos = valid_transitive_infos,
         )
     elif AppleBundleInfo in target:
+        if target.label.name.count("Runnable"):
+            print("process_top_level_target: {}".format(target.label.name))
         processed_target = process_top_level_target(
             ctx = ctx,
             build_mode = build_mode,
@@ -549,7 +551,12 @@ def create_xcodeprojinfo(*, ctx, build_mode, target, attrs, transitive_infos):
         target = target,
     )
 
-    if _should_skip_target(ctx = ctx, target = target):
+    skip = _should_skip_target(ctx = ctx, target = target)
+    # if target.label.name.count("Runnable"):
+    #     if target.label.name.count("_iPhone") or target.label.name.count("_iPad"):
+    #         skip = False
+    #     print("skip={}: target={}".format(skip, target.label.name))
+    if skip:
         info_fields = _skip_target(
             ctx = ctx,
             target = target,
