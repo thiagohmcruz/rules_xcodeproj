@@ -37,6 +37,9 @@ struct CompileTarget: Equatable {
 
 extension Target {
     var allDependencies: Set<TargetID> {
+        if "\(dependencies)".contains("_iPad-Air-2__16.2") { 
+            print("Target.allDependencies=\(self.name)")
+        }
         return dependencies.union(resourceBundleDependencies)
     }
 }

@@ -84,6 +84,8 @@ extension Generator {
             _ depID: TargetID,
             for id: TargetID
         ) throws -> ConsolidatedTarget.Key {
+            // print("id=\(id)")
+            // print("depID=\(depID)")
             guard let dependencyKey = targetIDMapping[depID] else {
                 throw PreconditionError(message: """
 Target "\(id)" dependency on "\(depID)" not found in \
@@ -416,6 +418,9 @@ extension ConsolidatedTarget {
         extensions = aTarget.extensions
         appClips = aTarget.appClips
 
+        if "\(aTarget.allDependencies)".contains("_iPad-Air-2__16.2") { 
+            print("ConsolidatedTarget.init=\(aTarget.name)")
+        }
         allDependencies = aTarget.allDependencies
         outputs = ConsolidatedTargetOutputs(
             hasOutputs: self.targets.values.contains { $0.outputs.hasOutputs },

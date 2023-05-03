@@ -659,6 +659,8 @@ targets.
             src_target = focused_targets[src]
             target_merges.setdefault(src, []).append(dest)
             target_merge_srcs_by_label.setdefault(src_target.label, []).append(src)
+    
+    # print(target_merges)
 
     non_mergable_targets = {}
     non_terminal_dests = {}
@@ -681,6 +683,7 @@ targets.
             # can't merge into other targets
             non_mergable_targets[library.path] = None
 
+    print("before: {}".format(target_merges))
     for src in target_merges.keys():
         src_target = focused_targets[src]
         if (len(non_terminal_dests.get(src, [])) > 1 or
@@ -689,6 +692,7 @@ targets.
             # target consolidation issues
             for id in target_merge_srcs_by_label[src_target.label]:
                 target_merges.pop(id, None)
+    print("after: {}".format(target_merges))
 
     # Remap 'target_merge_dests' after popping invalid merges.
     target_merge_dests = {}
@@ -797,7 +801,7 @@ targets.
             transitive_dependencies,
             replaced_dependencies,
         )
-
+        
         compile_params = []
         if xcode_target.c_params:
             compile_params.append(xcode_target.c_params)

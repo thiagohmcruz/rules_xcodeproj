@@ -43,6 +43,11 @@ Target \(key)'s dependency on \(dependencyKey) not found in `pbxTargets`
                         return nil
                     }
 
+                    if dependency.name.contains("Single-Application-RunnableTestSuite_iPad-Air-2__16.2") {
+                        print("removing: _iPad-Air-2__16.2")
+                        return nil
+                    }
+                    
                     return dependency
                 }
                 // Sort them by name
