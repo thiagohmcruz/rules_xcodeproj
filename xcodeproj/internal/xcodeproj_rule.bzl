@@ -336,14 +336,14 @@ def _process_targets(
 
     keys_with_multiple = [k for k in xcode_configurations.keys() if k in multiple_labels]
     for k in keys_with_multiple:
-        print(k)
-        print(types.is_string(k))
+        # print(k)
+        # print(types.is_string(k))
         foo_config = k.split(" ")[1]
         v = xcode_configurations.pop(k)
         m_labels = multiple_labels[k]
         for m_l in m_labels:
-            print(m_l)
-            print(types.is_string(m_l))
+            # print(m_l)
+            # print(types.is_string(m_l))
             # m_id = get_id(label = "%s" % m_l, configuration = foo_config)
             m_id = get_id(label = "@//{}:{}".format(m_l.package, m_l.name), configuration = foo_config)
             for y in v:
@@ -1581,12 +1581,6 @@ configurations: {}""".format(", ".join(xcode_configurations)))
         id: labels
         for id, labels in multiple_labels.items() if len(labels) > 1
     }
-
-    for k, v in multiple_labels.items():
-        print(k)
-        print(types.is_string(k))
-
-
     # print(multiple_labels)
 
     replacement_labels = {
