@@ -774,14 +774,14 @@ targets.
 
         # print(multiple_labels)
         # print(xcode_target.id)
-        og_id = None
-        if " " in xcode_target.id:
-            foo_prefix_label = Label(xcode_target.id.split(" ")[0])
-            for k, v in multiple_labels.items():
-                for x in v:
-                    if x.name == foo_prefix_label.name and x.package == foo_prefix_label.package:
-                        og_id = k
-                        break
+        # og_id = None
+        # if " " in xcode_target.id:
+        #     foo_prefix_label = Label(xcode_target.id.split(" ")[0])
+        #     for k, v in multiple_labels.items():
+        #         for x in v:
+        #             if x.name == foo_prefix_label.name and x.package == foo_prefix_label.package:
+        #                 og_id = k
+        #                 break
 
         # print("xcode_target.id={}".format(xcode_target.id))
         # print("xcode_target.og_id={}".format(xcode_target.original_id))
@@ -808,8 +808,6 @@ targets.
             xcode_generated_paths_file = xcode_generated_paths_file,
         )
         target_dtos[xcode_target.id] = dto
-        if xcode_target.original_id:
-            target_dtos[xcode_target.original_id] = dto
         target_dependencies[xcode_target.id] = (
             transitive_dependencies,
             replaced_dependencies,
@@ -1646,6 +1644,7 @@ configurations: {}""".format(", ".join(xcode_configurations)))
         actions = actions,
         name = name,
         target_dtos = target_dtos,
+        multiple_labels = multiple_labels,
     )
 
     extension_infoplists = [
