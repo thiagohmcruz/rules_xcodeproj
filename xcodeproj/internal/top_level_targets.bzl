@@ -267,7 +267,6 @@ def process_top_level_target(
     )
 
     if infoplist:
-        print("infoplist: {}".format(infoplist))
         build_settings["INFOPLIST_FILE"] = build_setting_path(
             file = infoplist,
         )
@@ -395,8 +394,7 @@ def process_top_level_target(
     )
     debug_outputs = target[apple_common.AppleDebugOutputs] if apple_common.AppleDebugOutputs in target else None
     output_group_info = target[OutputGroupInfo] if OutputGroupInfo in target else None
-    if id.count("Runnable"):
-        print("top: id={}".format(id))
+
     (target_outputs, provider_outputs) = output_files.collect(
         ctx = ctx,
         debug_outputs = debug_outputs,
@@ -525,6 +523,7 @@ def process_top_level_target(
         transitive_dependencies = transitive_dependencies,
         xcode_target = xcode_targets.make(
             id = id,
+            original_id = id,
             label = label,
             configuration = configuration,
             package_bin_dir = package_bin_dir,

@@ -420,8 +420,6 @@ def _create_xcodeprojinfo(
             transitive_infos = valid_transitive_infos,
         )
     elif AppleBundleInfo in target:
-        if target.label.name.count("Runnable"):
-            print("process_top_level_target: {}".format(target.label.name))
         processed_target = process_top_level_target(
             ctx = ctx,
             build_mode = build_mode,

@@ -270,7 +270,11 @@ $(BAZEL_OUT)\#(linkParams.path.string.dropFirst(9))
             "BAZEL_PACKAGE_BIN_DIR",
             to: target.packageBinDir.string
         )
-        buildSettings.set("BAZEL_TARGET_ID", to: id.rawValue)
+        if let odID = target.originalTargetID {
+            buildSettings.set("BAZEL_TARGET_ID", to: odID.rawValue)
+        } else {
+            buildSettings.set("BAZEL_TARGET_ID", to: id.rawValue)
+        }
         buildSettings.set("PRODUCT_NAME", to: target.product.name)
         buildSettings.set("SDKROOT", to: target.platform.os.sdkRoot)
         buildSettings.set(
@@ -294,7 +298,7 @@ $(BAZEL_OUT)\#(linkParams.path.string.dropFirst(9))
         if target.compileTargets.count > 0 {
             buildSettings.set(
                 "BAZEL_COMPILE_TARGET_IDS",
-                to: target.compileTargets.map(\.id.rawValue)
+                to: target.compileTargets.map(\.id.rawValue
             )
         }
 
@@ -340,6 +344,7 @@ $(BAZEL_OUT)\#(linkParams.path.string.dropFirst(9))
                 "BAZEL_HOST_LABEL_\(index)",
                 to: hostTarget.label.description
             )
+            // buildSettings.set("BAZEL_HOST_TARGET_ID_\(index)", to: hostTarget.originalTargetID?.rawValue ?? id.rawValue)
             buildSettings.set("BAZEL_HOST_TARGET_ID_\(index)", to: id.rawValue)
         }
 
