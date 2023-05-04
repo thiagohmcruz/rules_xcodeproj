@@ -116,10 +116,10 @@ add it or a target that depends on it to \(runnerLabel)'s `top_level_targets` at
             }
         }
 
-        // let otherLabels = allBazelLabels.subtracting(topLevelLabels).subtracting(Set<BazelLabel>(
-        //     [try BazelLabel("@//tests/macos/xcodeproj:Single-Application-RunnableTestSuite")]
-        //     ))
-        let otherLabels = allBazelLabels.subtracting(topLevelLabels)
+        let otherLabels = allBazelLabels.subtracting(topLevelLabels).subtracting(Set<BazelLabel>(
+            [try BazelLabel("@//tests/macos/xcodeproj:Single-Application-RunnableTestSuite")]
+            ))
+        // let otherLabels = allBazelLabels.subtracting(topLevelLabels)
         for label in otherLabels {
             let labelTargetInfo = try labelTargetInfos.value(
                 for: label,
