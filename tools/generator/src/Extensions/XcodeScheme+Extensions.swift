@@ -69,30 +69,56 @@ add it or a target that depends on it to \(runnerLabel)'s `top_level_targets` at
         var topLevelLabels: Set<BazelLabel> = []
         var topLevelTargetIDs: Set<TargetID> = []
         var topLevelPlatforms: Set<Platform> = []
+        
+        // print("allBazelLabels=\(allBazelLabels)")
+        // fatalError("labelTargetInfos=\(type(of: labelTargetInfos.first!))")
+        
+        // for label in allBazelLabels.subtracting(Set<BazelLabel>(
+        //     [try BazelLabel("@//tests/macos/xcodeproj:Single-Application-RunnableTestSuite")]
+        //     )) {
         for label in allBazelLabels {
-            let labelTargetInfo = try labelTargetInfos.value(
-                for: label,
-                message: aliasErrorMessage(
-                    runnerLabel: runnerLabel,
-                    missingLabel: label
-                )
-            )
-            guard labelTargetInfo.isTopLevel else {
-                continue
+            // fatalError("""
+            // label=\(label)
+            // wot=\(labelTargetInfos.map { $0.value.originalLabel })
+            // labelTargetInfos=\(labelTargetInfos.map { $0.value.label == label })
+            // """)
+
+            let labelTargetInfoMany: [BazelLabel: XcodeScheme.LabelTargetInfo] = labelTargetInfos.filter({
+                $0.value.label == label || $0.value.originalLabel == label
+            })
+            guard labelTargetInfoMany.count > 0 else {
+                fatalError("lol")
             }
 
-            if let best = try labelTargetInfo
-                .bestPerConfiguration[configuration]
-            {
-                topLevelLabels.insert(label)
-                topLevelPlatforms.formUnion(best.platforms)
+            for (_, labelTargetInfo) in labelTargetInfoMany {
+                print("foo:labelTargetInfo=\(labelTargetInfo.label)")
+                // let labelTargetInfo = try labelTargetInfos.value(
+                //     for: label,
+                //     message: aliasErrorMessage(
+                //         runnerLabel: runnerLabel,
+                //         missingLabel: label
+                //     )
+                // )
+                guard labelTargetInfo.isTopLevel else {
+                    continue
+                }
 
-                let targetID = best.id
-                topLevelTargetIDs.insert(targetID)
-                resolvedTargetIDs[label] = targetID
+                if let best = try labelTargetInfo
+                    .bestPerConfiguration[configuration]
+                {
+                    topLevelLabels.insert(labelTargetInfo.label)
+                    topLevelPlatforms.formUnion(best.platforms)
+
+                    let targetID = best.id
+                    topLevelTargetIDs.insert(targetID)
+                    resolvedTargetIDs[labelTargetInfo.label] = targetID
+                }                
             }
         }
 
+        // let otherLabels = allBazelLabels.subtracting(topLevelLabels).subtracting(Set<BazelLabel>(
+        //     [try BazelLabel("@//tests/macos/xcodeproj:Single-Application-RunnableTestSuite")]
+        //     ))
         let otherLabels = allBazelLabels.subtracting(topLevelLabels)
         for label in otherLabels {
             let labelTargetInfo = try labelTargetInfos.value(
@@ -143,6 +169,7 @@ extension XcodeScheme {
         }
 
         let label: BazelLabel
+        let originalLabel: BazelLabel?
         let isTopLevel: Bool
         var configurationInfos: [String: ConfigurationInfo] = [:]
     }

@@ -95,8 +95,22 @@ struct TargetResolver: Equatable {
                 .TargetWithID(id: targetID, target: target)
             let isTopLevel = try localPBXTargetInfo(for: targetID)
                 .pbxTarget.isTopLevel
+            // print(targetID)
+            // print(target.originalTargetID)
+            var tID: String? = nil
+            var tIDLabel: BazelLabel? = nil 
+            
+            if let fooOg = target.originalTargetID?.rawValue {
+                tID = fooOg.components(separatedBy: " ").first!
+            }
+
+            if let footID = tID {
+                tIDLabel = try? BazelLabel(footID.replacingOccurrences(of: ".__internal__.__test_bundle", with: ""))
+            }           
+            // print(tIDLabel)
             labelTargetInfos[target.label, default: .init(
                 label: target.label,
+                originalLabel: tIDLabel,
                 isTopLevel: isTopLevel
             )].add(targetWithID)
         }
