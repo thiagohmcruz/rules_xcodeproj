@@ -22,9 +22,9 @@ load(":target_id.bzl", "get_id")
 
 def replace_label(xcode_target, label):
     foo =  struct(
-        id = get_id(label = label, configuration = xcode_target.configuration),
+        id = get_id(label = "@//{}:{}".format(label.package, label.name), configuration = xcode_target.configuration),
         original_id = xcode_target.original_id,
-        label = Label(label),
+        label = label,
         configuration = xcode_target.configuration,
         _app_clips = xcode_target._app_clips,
         _build_settings = xcode_target._build_settings,

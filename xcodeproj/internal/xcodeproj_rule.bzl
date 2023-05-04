@@ -2,6 +2,7 @@
 
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@bazel_skylib//lib:types.bzl", "types")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load(
     "//xcodeproj/internal/bazel_integration_files:actions.bzl",
@@ -335,11 +336,16 @@ def _process_targets(
 
     keys_with_multiple = [k for k in xcode_configurations.keys() if k in multiple_labels]
     for k in keys_with_multiple:
+        print(k)
+        print(types.is_string(k))
         foo_config = k.split(" ")[1]
         v = xcode_configurations.pop(k)
         m_labels = multiple_labels[k]
         for m_l in m_labels:
-            m_id = get_id(label = "@%s" % m_l, configuration = foo_config)
+            print(m_l)
+            print(types.is_string(m_l))
+            # m_id = get_id(label = "%s" % m_l, configuration = foo_config)
+            m_id = get_id(label = "@//{}:{}".format(m_l.package, m_l.name), configuration = foo_config)
             for y in v:
                 xcode_configurations.setdefault(m_id, []).append(y)
     # print(xcode_configurations)
@@ -349,7 +355,8 @@ def _process_targets(
         v = unprocessed_targets.pop(k)
         m_labels = multiple_labels[k]
         for m_l in m_labels:
-            replaced_v = replace_label(v, "@//{}:{}".format(m_l.package, m_l.name))
+            # replaced_v = replace_label(v, "@//{}:{}".format(m_l.package, m_l.name))
+            replaced_v = replace_label(v, m_l)
             unprocessed_targets.update({
                 replaced_v.id: replaced_v
             })
@@ -760,7 +767,20 @@ targets.
         else:
             additional_scheme_target_ids = None
 
+        foo_keys = xcode_target_labels.keys()
+        
         label = xcode_target_labels[xcode_target.id]
+        aff_keys = [k for k in foo_keys if k.count("Single-Application-RunnableTestSuite")]
+        
+        if xcode_target.id not in xcode_configurations:
+            print("aff_keys={}".format(aff_keys))
+            print("xcode_target.id={}".format(xcode_target.id))
+            print("types.is_string(xcode_target.id)={}".format(types.is_string(xcode_target.id)))
+            print("xcode_target.id in xcode_configurations={}".format(xcode_target.id in xcode_configurations))
+
+            for lol_k in aff_keys:
+                print("lol_k={}".format(lol_k))
+                print("types.is_string(lol_k)={}".format(types.is_string(lol_k)))
         target_xcode_configurations = xcode_configurations[xcode_target.id]
 
         if include_lldb_context and xcode_target.lldb_context_key:
@@ -1561,6 +1581,11 @@ configurations: {}""".format(", ".join(xcode_configurations)))
         id: labels
         for id, labels in multiple_labels.items() if len(labels) > 1
     }
+
+    for k, v in multiple_labels.items():
+        print(k)
+        print(types.is_string(k))
+
 
     # print(multiple_labels)
 
