@@ -659,9 +659,6 @@ def _xcode_target_to_dto(
         dto["x"] = xcode_configurations
 
     if xcode_target._compile_targets:
-        # if xcode_target.id.count("Runnable"):
-        #     print(xcode_target.id)
-        #     fail([x.id for x in xcode_target._compile_targets])
         dto["3"] = [{
             "i": compile_target.id,
             "oi": compile_target.original_id,
