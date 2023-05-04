@@ -298,7 +298,7 @@ $(BAZEL_OUT)\#(linkParams.path.string.dropFirst(9))
         if target.compileTargets.count > 0 {
             buildSettings.set(
                 "BAZEL_COMPILE_TARGET_IDS",
-                to: target.compileTargets.map(\.id.rawValue
+                to: target.compileTargets.map(\.id.rawValue)
             )
         }
 
