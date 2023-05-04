@@ -339,7 +339,7 @@ def _process_targets(
         v = xcode_configurations.pop(k)
         m_labels = multiple_labels[k]
         for m_l in m_labels:
-            m_id = get_id(label = m_l, configuration = foo_config)
+            m_id = get_id(label = "@%s" % m_l, configuration = foo_config)
             for y in v:
                 xcode_configurations.setdefault(m_id, []).append(y)
     # print(xcode_configurations)
@@ -760,7 +760,6 @@ targets.
         else:
             additional_scheme_target_ids = None
 
-        # print(xcode_target_labels)
         label = xcode_target_labels[xcode_target.id]
         target_xcode_configurations = xcode_configurations[xcode_target.id]
 
