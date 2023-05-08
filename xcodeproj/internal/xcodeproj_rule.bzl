@@ -1601,7 +1601,6 @@ configurations: {}""".format(", ".join(xcode_configurations)))
         actions = actions,
         name = name,
         target_dtos = target_dtos,
-        multiple_labels = multiple_labels,
     )
 
     extension_infoplists = [
