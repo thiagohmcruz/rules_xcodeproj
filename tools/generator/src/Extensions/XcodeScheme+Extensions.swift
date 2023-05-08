@@ -71,59 +71,61 @@ add it or a target that depends on it to \(runnerLabel)'s `top_level_targets` at
         var topLevelLabels: Set<BazelLabel> = []
         var topLevelTargetIDs: Set<TargetID> = []
         var topLevelPlatforms: Set<Platform> = []
-
         for label in allBazelLabels {
-            let labelTargetInfoMany: [BazelLabel: XcodeScheme.LabelTargetInfo] = labelTargetInfos.filter({
-                $0.value.label == label || $0.value.originalLabel == label
-            })
-            guard labelTargetInfoMany.count > 0 else {
-                fatalError("lol: \(labelTargetInfoMany.count)")
+            let labelTargetInfo = try labelTargetInfos.value(
+                for: label,
+                message: aliasErrorMessage(
+                    runnerLabel: runnerLabel,
+                    missingLabel: label
+                )
+            )
+            guard labelTargetInfo.isTopLevel else {
+                continue
             }
 
-            for (_, labelTargetInfo) in labelTargetInfoMany {
-                guard labelTargetInfo.isTopLevel else {
-                    continue
-                }
+            if let best = try labelTargetInfo
+                .bestPerConfiguration[configuration]
+            {
+                topLevelLabels.insert(label)
+                topLevelPlatforms.formUnion(best.platforms)
 
-                if let best = try labelTargetInfo
-                    .bestPerConfiguration[configuration]
-                {
-                    topLevelLabels.insert(label)
-                    topLevelPlatforms.formUnion(best.platforms)
-
-                    let targetID = best.id
-                    topLevelTargetIDs.insert(targetID)
-                    resolvedTargetIDs[labelTargetInfo.label] = targetID
-                }
+                let targetID = best.id
+                topLevelTargetIDs.insert(targetID)
+                resolvedTargetIDs[label] = targetID
             }
         }
 
         let otherLabels = allBazelLabels.subtracting(topLevelLabels)
         for label in otherLabels {
-            let labelTargetInfoMany: [BazelLabel: XcodeScheme.LabelTargetInfo] = labelTargetInfos.filter({
-                $0.value.label == label || $0.value.originalLabel == label
-            })
+            let labelTargetInfo = try labelTargetInfos.value(
+                for: label,
+                message: aliasErrorMessage(
+                    runnerLabel: runnerLabel,
+                    missingLabel: label
+                )
+            )
 
-            for (_, labelTargetInfo) in labelTargetInfoMany {
-                if let targetID = targets.firstTargetID(
-                    under: topLevelTargetIDs,
-                    where: { target in
-                        return target.label == label &&
-                        target.xcodeConfigurations.contains(configuration)
-                    }
+            // Check for dependency of a top-level target that matches the
+            // label. Or check for a target that has a matching top-level
+            // platform. Or finally pick the default "best" target.
+            if let targetID = targets.firstTargetID(
+                under: topLevelTargetIDs,
+                where: { target in
+                    return target.label == label &&
+                      target.xcodeConfigurations.contains(configuration)
+                }
+            ) {
+                resolvedTargetIDs[label] = targetID
+            } else {
+                if let targetWithID = labelTargetInfo.firstCompatibleWith(
+                    anyOf: topLevelPlatforms,
+                    configuration: configuration
                 ) {
-                    resolvedTargetIDs[label] = targetID
-                } else {
-                    if let targetWithID = labelTargetInfo.firstCompatibleWith(
-                        anyOf: topLevelPlatforms,
-                        configuration: configuration
-                    ) {
-                        resolvedTargetIDs[label] = targetWithID.id
-                    } else if let best =
-                        try labelTargetInfo.bestPerConfiguration[configuration]
-                    {
-                        resolvedTargetIDs[label] = best.id
-                    }
+                    resolvedTargetIDs[label] = targetWithID.id
+                } else if let best =
+                    try labelTargetInfo.bestPerConfiguration[configuration]
+                {
+                    resolvedTargetIDs[label] = best.id
                 }
             }
         }
@@ -143,7 +145,6 @@ extension XcodeScheme {
         }
 
         let label: BazelLabel
-        let originalLabel: BazelLabel?
         let isTopLevel: Bool
         var configurationInfos: [String: ConfigurationInfo] = [:]
     }
