@@ -2,7 +2,6 @@
 
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_skylib//lib:paths.bzl", "paths")
-load("@bazel_skylib//lib:types.bzl", "types")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load(
     "//xcodeproj/internal/bazel_integration_files:actions.bzl",
@@ -298,8 +297,7 @@ def _process_targets(
         name,
         owned_extra_files,
         include_swiftui_previews_scheme_targets,
-        fail_for_invalid_extra_files_targets,
-        multiple_labels):
+        fail_for_invalid_extra_files_targets):
     resource_bundle_xcode_targets = []
     unprocessed_targets = {}
     xcode_configurations = {}
@@ -1561,7 +1559,6 @@ configurations: {}""".format(", ".join(xcode_configurations)))
         owned_extra_files = ctx.attr.owned_extra_files,
         replacement_labels = replacement_labels,
         unfocused_labels = unfocused_labels,
-        multiple_labels = multiple_labels,
     )
 
     args = {

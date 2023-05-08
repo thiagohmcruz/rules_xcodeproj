@@ -758,7 +758,7 @@ def _xcode_target_to_dto(
         if (id not in excluded_targets and
             # TODO: Move dependency filtering here (out of the generator)
             # In BwX mode there can only be one merge destination
-            len([x for x in target_merges.get(id, [id]) if x != xcode_target.id]) == 0)
+            target_merges.get(id, [id])[0] != xcode_target.id)
     ]
 
     set_if_true(
