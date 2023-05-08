@@ -26,7 +26,7 @@ load(":platforms.bzl", "platforms")
 load(":project_options.bzl", "project_options_to_dto")
 load(":providers.bzl", "XcodeProjInfo")
 load(":resource_target.bzl", "process_resource_bundles")
-load(":target_id.bzl", "write_target_ids_list")
+load(":target_id.bzl", "write_target_ids_list", "get_shared_label")
 load(":xcode_targets.bzl", "xcode_targets")
 
 # Utility
@@ -1485,47 +1485,29 @@ configurations: {}""".format(", ".join(xcode_configurations)))
     )
     focused_labels = {label: None for label in ctx.attr.focused_targets}
     unfocused_labels = {label: None for label in ctx.attr.unfocused_targets}
+    same_id_labels = {}
 
     replacement_labels_infos = depset(
         transitive = [info.replacement_labels for info in infos],
     ).to_list()
 
-    multiple_labels = {}
     for r in replacement_labels_infos:
-        if r.id not in multiple_labels:
-            multiple_labels[r.id] = []
-        multiple_labels[r.id].append(r.label)
+        if r.id not in same_id_labels:
+            same_id_labels[r.id] = []
+        same_id_labels[r.id].append(r.label)
 
-    multiple_labels = {
+    same_id_labels = {
         id: labels
-        for id, labels in multiple_labels.items() if len(labels) > 1
+        for id, labels in same_id_labels.items() if len(labels) > 1
     }
     replacement_labels = {
         r.id: r.label
-        for r in replacement_labels_infos if r.id not in multiple_labels
+        for r in replacement_labels_infos if r.id not in same_id_labels
     }
 
-    def _longest_common_prefix(strs):
-        if not strs:
-            return ""
-        shortest_str = strs[0]
-        for s in strs:
-            if len(s) < len(shortest_str):
-                shortest_str = s
-        index = 0
-        for char in shortest_str.elems():
-            for other in strs:
-                if other[index] != char:
-                    return shortest_str[:index]
-            index += 1
-        return shortest_str
-
-    for (id, labels) in multiple_labels.items():
-        foo = _longest_common_prefix(["%s" % label for label in labels])
-        if "_" in foo:
-            foo = foo.split("_")[0]
-        fooa = "@%s" % foo
-        replacement_labels[id] = Label(fooa)
+    for (id, labels) in same_id_labels.items():
+        shared_label = get_shared_label(id = id, labels = labels)
+        replacement_labels[id] = Label(shared_label)
 
     (
         targets,
