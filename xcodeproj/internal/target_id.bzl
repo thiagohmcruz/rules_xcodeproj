@@ -12,7 +12,10 @@ def get_id(*, label, configuration):
     Returns:
         An opaque string that uniquely identifies the target.
     """
-    return "{} {}".format(label, configuration)
+    return "{} {}".format(
+        bazel_labels.normalize_label(label),
+        configuration,
+    )
 
 def _longest_common_prefix(labels):
     if not labels:
@@ -51,15 +54,12 @@ def calculate_replacement_label(*, id, replacement_labels):
         The longest common prefix between the list of labels and the label contained in the id,
         if a longest common prefix is not found the label contained in the id is returned
     """
-    id_label = id.split(" ")[0]  # This assumes the id follows the creation pattern in `get_id`
-
     res = _longest_common_prefix(
-        [id_label] + [bazel_labels.normalize_label(label) for label in replacement_labels],
+        [id] + [bazel_labels.normalize_label(label) for label in replacement_labels],
     )
     if not res:
         return None
 
-    res = bazel_labels.normalize_label(res)
     return Label(res)
 
 def write_target_ids_list(*, actions, name, target_ids):
