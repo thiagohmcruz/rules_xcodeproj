@@ -1498,9 +1498,9 @@ configurations: {}""".format(", ".join(xcode_configurations)))
     for id, labels in raw_replacement_labels.items():
         if len(labels) > 1:
             replacement_labels[id] = calculate_replacement_label(
-                 id = id,
-                 replacement_labels = labels,
-             )
+                id = id,
+                replacement_labels = labels,
+            )
         else:
             replacement_labels[id] = labels[0]
 
