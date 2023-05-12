@@ -1,7 +1,5 @@
 """Functions dealing with Target IDs."""
 
-load(":bazel_labels.bzl", "bazel_labels")
-
 def get_id(*, label, configuration):
     """Generates a unique identifier for a target.
 

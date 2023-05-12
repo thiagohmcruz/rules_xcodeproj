@@ -1485,7 +1485,6 @@ configurations: {}""".format(", ".join(xcode_configurations)))
     )
     focused_labels = {label: None for label in ctx.attr.focused_targets}
     unfocused_labels = {label: None for label in ctx.attr.unfocused_targets}
-
     replacement_labels = {
         r.id: r.label
         for r in depset(

@@ -211,7 +211,6 @@ def _skip_target(
         ctx,
         skip_type = None,
         target,
-        replacement_label = None,
         deps,
         deps_attrs,
         transitive_infos,
@@ -225,7 +224,6 @@ def _skip_target(
         ctx: The aspect context.
         skip_type: foo.
         target: The `Target` to skip.
-        replacement_label: foo.
         deps: `Target`s collected from `ctx.attr.deps`.
         deps_attrs: A sequence of attribute names to collect `Target`s from for
             `deps`-like attributes.
@@ -596,7 +594,7 @@ def create_xcodeprojinfo(*, ctx, build_mode, target, attrs, transitive_infos):
 
     if not info_fields:
         return None
-    
+
     return XcodeProjInfo(
         label = target.label,
         labels = depset(
