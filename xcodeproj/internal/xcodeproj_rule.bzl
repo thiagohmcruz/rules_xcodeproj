@@ -26,7 +26,7 @@ load(":platforms.bzl", "platforms")
 load(":project_options.bzl", "project_options_to_dto")
 load(":providers.bzl", "XcodeProjInfo")
 load(":resource_target.bzl", "process_resource_bundles")
-load(":target_id.bzl", "calculate_replacement_label", "write_target_ids_list")
+load(":target_id.bzl", "write_target_ids_list")
 load(":xcode_targets.bzl", "xcode_targets")
 
 # Utility
@@ -1486,23 +1486,12 @@ configurations: {}""".format(", ".join(xcode_configurations)))
     focused_labels = {label: None for label in ctx.attr.focused_targets}
     unfocused_labels = {label: None for label in ctx.attr.unfocused_targets}
 
-    replacement_labels_infos = depset(
-        transitive = [info.replacement_labels for info in infos],
-    ).to_list()
-
-    raw_replacement_labels = {}
-    for r in replacement_labels_infos:
-        raw_replacement_labels.setdefault(r.id, []).append(r.label)
-
-    replacement_labels = {}
-    for id, labels in raw_replacement_labels.items():
-        if len(labels) > 1:
-            replacement_labels[id] = calculate_replacement_label(
-                id = id,
-                replacement_labels = labels,
-            )
-        else:
-            replacement_labels[id] = labels[0]
+    replacement_labels = {
+        r.id: r.label
+        for r in depset(
+            transitive = [info.replacement_labels for info in infos],
+        ).to_list()
+    }
 
     (
         targets,
