@@ -12,10 +12,7 @@ def get_id(*, label, configuration):
     Returns:
         An opaque string that uniquely identifies the target.
     """
-    return "{} {}".format(
-        bazel_labels.normalize_label(label),
-        configuration,
-    )
+    return "{} {}".format(label, configuration)
 
 def _longest_common_prefix(labels):
     if not labels:

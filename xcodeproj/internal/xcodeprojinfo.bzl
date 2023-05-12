@@ -71,7 +71,6 @@ _BUILD_TEST_RULES = {
     "macos_build_test": None,
     "tvos_build_test": None,
     "watchos_build_test": None,
-    "test_suite": None,
 }
 
 _TEST_SUITE_RULES = {
@@ -92,8 +91,6 @@ def _should_skip_target(*, ctx, target):
         `True` if `target` should be skipped for target generation.
     """
     if ctx.rule.kind in _BUILD_TEST_RULES:
-        return True
-    if ctx.rule.kind in _TEST_SUITE_RULES:
         return True
 
     if ctx.rule.kind in _TEST_SUITE_RULES:
