@@ -450,7 +450,14 @@ def _create_xcodeprojinfo(
         ))
     ]
 
-    if not automatic_target_info.should_generate_target:
+    force_should_generate_target = False
+    if target.label.workspace_name == "square_protos" or \
+    target.label.workspace_name == "wire_protos" or \
+    target.label.name.count("_framework_unlinked") or \
+    target.label.name.count("gen_wiring"):
+        force_should_generate_target = True
+
+    if not automatic_target_info.should_generate_target or force_should_generate_target:
         processed_target = process_non_xcode_target(
             ctx = ctx,
             target = target,

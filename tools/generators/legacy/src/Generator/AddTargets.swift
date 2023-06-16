@@ -461,13 +461,7 @@ File "\(sourceFile.filePath)" not found in `files`
 
         let buildFiles: [PBXBuildFile]
         if hasCompileStub {
-            guard let compileStub = compileStub else {
-                throw PreconditionError(message: "`compileStub` is nil")
-            }
-
-            let compileStubBuildFile = PBXBuildFile(file: compileStub)
-            pbxProj.add(object: compileStubBuildFile)
-            buildFiles = [compileStubBuildFile]
+            buildFiles = []
         } else {
             buildFiles = try sources.map(buildFile)
         }
