@@ -1,0 +1,103 @@
+diff --git a/tools/generators/legacy/src/Generator/AddTargets.swift b/tools/generators/legacy/src/Generator/AddTargets.swift
+index 15557df0..6feb4f4e 100644
+--- a/tools/generators/legacy/src/Generator/AddTargets.swift
++++ b/tools/generators/legacy/src/Generator/AddTargets.swift
+@@ -461,13 +461,7 @@ File "\(sourceFile.filePath)" not found in `files`
+ 
+         let buildFiles: [PBXBuildFile]
+         if hasCompileStub {
+-            guard let compileStub = compileStub else {
+-                throw PreconditionError(message: "`compileStub` is nil")
+-            }
+-
+-            let compileStubBuildFile = PBXBuildFile(file: compileStub)
+-            pbxProj.add(object: compileStubBuildFile)
+-            buildFiles = [compileStubBuildFile]
++            buildFiles = []
+         } else {
+             buildFiles = try sources.map(buildFile)
+         }
+diff --git a/xcodeproj/internal/configuration.bzl b/xcodeproj/internal/configuration.bzl
+index 5fa41e89..f552c638 100644
+--- a/xcodeproj/internal/configuration.bzl
++++ b/xcodeproj/internal/configuration.bzl
+@@ -1,6 +1,6 @@
+ """Functions for calculating configuration."""
+ 
+-def calculate_configuration(*, bin_dir_path):
++def calculate_configuration(*, bin_dir_path, ctx = None):
+     """Generates a configuration identifier for a target.
+ 
+     `ConfiguredTarget.getConfigurationKey()` isn't exposed to Starlark, so we
+@@ -8,11 +8,22 @@ def calculate_configuration(*, bin_dir_path):
+ 
+     Args:
+         bin_dir_path: `ctx.bin_dir.path`.
++        ctx: The aspect context.
+ 
+     Returns:
+         A string that uniquely identifies the configuration of a target.
+     """
+     path_components = bin_dir_path.split("/")
++
+     if len(path_components) > 2:
+-        return path_components[1]
++        configuration = path_components[1]
++        if ctx \
++        and "applebin_ios-" in configuration \
++        and len(configuration) > 1 \
++        and ( ( ctx.rule.kind == "objc_library" and ctx.rule.attr.name.endswith("_objc") ) or ( ctx.rule.kind == "swift_library" and ctx.rule.attr.name.endswith("_swift") ) ) \
++        or ( ctx and ctx.rule.kind == "apple_framework_packaging" ):
++            configuration_components = configuration.split("applebin_ios")
++            configuration = "applebin_ios" + configuration_components[1]
++
++        return configuration
+     return ""
+diff --git a/xcodeproj/internal/library_targets.bzl b/xcodeproj/internal/library_targets.bzl
+index 3f15cfc8..1b4b7949 100644
+--- a/xcodeproj/internal/library_targets.bzl
++++ b/xcodeproj/internal/library_targets.bzl
+@@ -47,7 +47,7 @@ def process_library_target(
+     Returns:
+         The value returned from `processed_target`.
+     """
+-    configuration = calculate_configuration(bin_dir_path = ctx.bin_dir.path)
++    configuration = calculate_configuration(bin_dir_path = ctx.bin_dir.path, ctx = ctx)
+     label = target.label
+     id = get_id(label = label, configuration = configuration)
+ 
+diff --git a/xcodeproj/internal/top_level_targets.bzl b/xcodeproj/internal/top_level_targets.bzl
+index 4a4ab151..a004b62f 100644
+--- a/xcodeproj/internal/top_level_targets.bzl
++++ b/xcodeproj/internal/top_level_targets.bzl
+@@ -185,7 +185,7 @@ def process_top_level_target(
+     Returns:
+         The value returned from `processed_target`.
+     """
+-    configuration = calculate_configuration(bin_dir_path = ctx.bin_dir.path)
++    configuration = calculate_configuration(bin_dir_path = ctx.bin_dir.path, ctx = ctx)
+     label = target.label
+     id = get_id(label = label, configuration = configuration)
+ 
+diff --git a/xcodeproj/internal/xcodeprojinfo.bzl b/xcodeproj/internal/xcodeprojinfo.bzl
+index 53e559d3..2a62049f 100644
+--- a/xcodeproj/internal/xcodeprojinfo.bzl
++++ b/xcodeproj/internal/xcodeprojinfo.bzl
+@@ -450,7 +450,14 @@ def _create_xcodeprojinfo(
+         ))
+     ]
+ 
+-    if not automatic_target_info.should_generate_target:
++    force_non_xcode_target = False
++    if target.label.workspace_name == "square_protos" or \
++    target.label.workspace_name == "wire_protos" or \
++    target.label.name.count("_framework_unlinked") or \
++    target.label.name.endswith("_objc") or \
++    target.label.name.endswith("_swift") or \
++    target.label.name.count("gen_wiring"):
++        force_non_xcode_target = True
++
++    if not automatic_target_info.should_generate_target or force_non_xcode_target:
+         processed_target = process_non_xcode_target(
+             ctx = ctx,
+             target = target,

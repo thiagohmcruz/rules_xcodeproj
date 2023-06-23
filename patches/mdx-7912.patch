@@ -1,0 +1,27 @@
+diff --git a/tools/generators/legacy/src/Generator/AddBazelDependenciesTarget.swift b/tools/generators/legacy/src/Generator/AddBazelDependenciesTarget.swift
+index 293f2e87..ff62c265 100644
+--- a/tools/generators/legacy/src/Generator/AddBazelDependenciesTarget.swift
++++ b/tools/generators/legacy/src/Generator/AddBazelDependenciesTarget.swift
+@@ -154,6 +154,10 @@ $(INDEXING_SUPPORTED_PLATFORMS__$(INDEX_ENABLE_BUILD_ARENA))
+             inputPaths: ["$(BAZEL_INTEGRATION_DIR)/$(CONFIGURATION)-swift_debug_settings.py"],
+             outputPaths: ["$(OBJROOT)/$(CONFIGURATION)/swift_debug_settings.py"],
+             shellScript: #"""
++sed -i '' \
++'s/_swift_vfs.yaml/_vfs.yaml/g' \
++"$SCRIPT_INPUT_FILE_0"
++
+ perl -pe '
+   # Replace "__BAZEL_XCODE_DEVELOPER_DIR__" with "$(DEVELOPER_DIR)"
+   s/__BAZEL_XCODE_DEVELOPER_DIR__/\$(DEVELOPER_DIR)/g;
+diff --git a/xcodeproj/internal/bazel_integration_files/generate_index_build_bazel_dependencies.sh b/xcodeproj/internal/bazel_integration_files/generate_index_build_bazel_dependencies.sh
+index 1e869183..84e14d56 100755
+--- a/xcodeproj/internal/bazel_integration_files/generate_index_build_bazel_dependencies.sh
++++ b/xcodeproj/internal/bazel_integration_files/generate_index_build_bazel_dependencies.sh
+@@ -9,6 +9,7 @@ readonly config="${BAZEL_CONFIG}_indexbuild"
+ # Compiled outputs (i.e. swiftmodules) and generated inputs
+ readonly output_groups=(
+   "bc $BAZEL_TARGET_ID"
++  "bp $BAZEL_TARGET_ID"
+ )
+ 
+ readonly base_outputs_regex='.*\.a$|.*\.swiftdoc$|.*\.swiftmodule$|.*\.swiftsourceinfo$'
