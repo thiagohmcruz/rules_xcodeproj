@@ -185,7 +185,7 @@ def process_top_level_target(
     Returns:
         The value returned from `processed_target`.
     """
-    configuration = calculate_configuration(bin_dir_path = ctx.bin_dir.path)
+    configuration = calculate_configuration(bin_dir_path = ctx.bin_dir.path, ctx = ctx)
     label = target.label
     id = get_id(label = label, configuration = configuration)
 

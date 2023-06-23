@@ -92,8 +92,6 @@ index 53e559d3..2a62049f 100644
 +    if target.label.workspace_name == "square_protos" or \
 +    target.label.workspace_name == "wire_protos" or \
 +    target.label.name.count("_framework_unlinked") or \
-+    target.label.name.endswith("_objc") or \
-+    target.label.name.endswith("_swift") or \
 +    target.label.name.count("gen_wiring"):
 +        force_non_xcode_target = True
 +
