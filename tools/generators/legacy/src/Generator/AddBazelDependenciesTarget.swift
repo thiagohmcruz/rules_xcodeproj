@@ -154,6 +154,10 @@ $(INDEXING_SUPPORTED_PLATFORMS__$(INDEX_ENABLE_BUILD_ARENA))
             inputPaths: ["$(BAZEL_INTEGRATION_DIR)/$(CONFIGURATION)-swift_debug_settings.py"],
             outputPaths: ["$(OBJROOT)/$(CONFIGURATION)/swift_debug_settings.py"],
             shellScript: #"""
+sed -i '' \
+'s/_swift_vfs.yaml/_vfs.yaml/g' \
+"$SCRIPT_INPUT_FILE_0"
+
 perl -pe '
   # Replace "__BAZEL_XCODE_DEVELOPER_DIR__" with "$(DEVELOPER_DIR)"
   s/__BAZEL_XCODE_DEVELOPER_DIR__/\$(DEVELOPER_DIR)/g;
