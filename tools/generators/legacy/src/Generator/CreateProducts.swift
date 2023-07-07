@@ -40,11 +40,17 @@ extension Generator {
                 continue
             }
 
+            var productName = name
+            var productPath = path
+            if name == nil && !path.contains(".") {
+                productName = path
+                productPath = target.name + "."
+            }
             let product = PBXFileReference(
                 sourceTree: .buildProductsDir,
-                name: name,
+                name: productName,
                 explicitFileType: fileType,
-                path: path,
+                path: productPath,
                 includeInIndex: false
             )
             pbxProj.add(object: product)
