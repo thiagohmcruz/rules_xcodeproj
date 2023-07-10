@@ -1,0 +1,13 @@
+diff --git a/xcodeproj/internal/xcodeprojinfo.bzl b/xcodeproj/internal/xcodeprojinfo.bzl
+index 79e7e115..bac02d27 100644
+--- a/xcodeproj/internal/xcodeprojinfo.bzl
++++ b/xcodeproj/internal/xcodeprojinfo.bzl
+@@ -318,7 +318,7 @@ def _skip_target(
+         #
+         # `iOSAppObjCUnitTestSuite_iPhone-13-Pro__16.2` => `iOSAppObjCUnitTestSuite`
+         #
+-        runner_label_name = ctx.rule.attr.runner.label.name
++        runner_label_name = ctx.rule.attr.runner.label.name.replace(".square", "").replace(".square.rbe", "")
+         label_name = target.label.name.replace("_{}".format(runner_label_name), "")
+ 
+         return Label(

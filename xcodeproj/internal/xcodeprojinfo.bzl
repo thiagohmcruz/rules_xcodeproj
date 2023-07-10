@@ -318,7 +318,7 @@ def _skip_target(
         #
         # `iOSAppObjCUnitTestSuite_iPhone-13-Pro__16.2` => `iOSAppObjCUnitTestSuite`
         #
-        runner_label_name = ctx.rule.attr.runner.label.name
+        runner_label_name = ctx.rule.attr.runner.label.name.replace(".square", "").replace(".square.rbe", "")
         label_name = target.label.name.replace("_{}".format(runner_label_name), "")
 
         return Label(
