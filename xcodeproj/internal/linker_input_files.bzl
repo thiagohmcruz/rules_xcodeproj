@@ -136,6 +136,7 @@ def _extract_top_level_values(
         cc_linker_inputs):
     if compilation_providers.objc:
         objc = compilation_providers.objc
+        _propagated_objc = compilation_providers._propagated_objc
         if avoid_compilation_providers:
             avoid_objc = avoid_compilation_providers.objc
             if not avoid_objc:
@@ -158,7 +159,8 @@ def _extract_top_level_values(
             avoid_static_framework_files = {}
             avoid_static_libraries = {}
 
-        dynamic_frameworks = objc.dynamic_framework_file.to_list()
+        dynamic_frameworks = _propagated_objc.dynamic_framework_file.to_list()
+
         static_frameworks = [
             file
             for file in objc.static_framework_file.to_list()
