@@ -32,5 +32,5 @@ rules_ios_apple_framework(
     },
     sdk_dylibs = ["c++"],
     tags = ["manual"],
-    visibility = ["//iOSApp:__subpackages__"],
+    visibility = ["//visibility:public"],
 )
